@@ -1,0 +1,84 @@
+import pandas as pd
+from datetime import datetime
+import sqlite3
+
+# Connect to SQLite database
+conn = sqlite3.connect('identifiers.db')
+cursor = conn.cursor()
+
+# Create the table if it doesn't exist
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS identifiers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT,
+    identifier TEXT UNIQUE
+)
+''')
+conn.commit()
+
+def add_identifier_with_date(date, identifier):
+    """Add a new identifier to the database with the given date."""
+    try:
+        cursor.execute('INSERT INTO identifiers (date, identifier) VALUES (?, ?)', (date, identifier))
+        conn.commit()
+        return {"isDuplicate": False, "message": "Identifier added successfully."}
+    except sqlite3.IntegrityError:
+        return {"isDuplicate": True, "message": "Duplicate identifier."}
+
+# Path to your Excel file
+excel_file_path = 'identifiers.xlsx'  # Replace with your actual file path
+
+# Read the Excel file
+df = pd.read_excel(excel_file_path)
+
+# Iterate through the rows and add them to the database
+for index, row in df.iterrows():
+    date = row['date']  # Assuming the date column is named 'date'
+    identifier = row['identifier']  # Assuming the identifier column is named 'identifier'
+    
+    # Ensure the date is in the correct format (YYYY-MM-DD)
+    try:
+        formatted_date = datetime.strptime(str(date), '%Y-%m-%d').strftime('%Y-%m-%d')
+    except ValueError:
+        print(f"Invalid date format for row {index}: {date}. Skipping this row.")
+        continue
+    
+    # Add to the database
+    result = add_identifier_with_date(formatted_date, identifier)
+    print(f"Row {index}: Identifier '{identifier}' - {result['message']}")
+
+
+#-----------------------------------------------------------------------------------
+
+
+import sqlite3
+from datetime import datetime
+
+# Initialize SQLite database
+conn = sqlite3.connect('identifiers.db')
+cursor = conn.cursor()
+
+# Create the table if not exists
+cursor.execute('''
+CREATE TABLE IF NOT EXISTS identifiers (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    date TEXT,
+    identifier TEXT UNIQUE
+)
+''')
+conn.commit()
+
+def add_identifier(identifier):
+    """Add a new identifier to the database."""
+    try:
+        date = datetime.now().strftime('%Y-%m-%d')
+        cursor.execute('INSERT INTO identifiers (date, identifier) VALUES (?, ?)', (date, identifier))
+        conn.commit()
+        return {"isDuplicate": False, "message": "Identifier added successfully."}
+    except sqlite3.IntegrityError:
+        return {"isDuplicate": True, "message": "Duplicate identifier."}
+
+def check_identifier(identifier):
+    """Check if an identifier exists in the database."""
+    cursor.execute('SELECT * FROM identifiers WHERE identifier = ?', (identifier,))
+    return cursor.fetchone() is not None
