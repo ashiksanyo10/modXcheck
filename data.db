@@ -1,51 +1,55 @@
 import pandas as pd
-from datetime import datetime
 import sqlite3
 
-# Connect to SQLite database
+# Connect to SQLite database (it will create the file if it doesn't exist)
 conn = sqlite3.connect('identifiers.db')
 cursor = conn.cursor()
 
-# Create the table if it doesn't exist
+# Create the identifiers table if it doesn't already exist
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS identifiers (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    date TEXT,
-    identifier TEXT UNIQUE
+    identifier TEXT UNIQUE,
+    taskid TEXT
 )
 ''')
 conn.commit()
 
-def add_identifier_with_date(date, identifier):
-    """Add a new identifier to the database with the given date."""
+def add_identifier(identifier, taskid):
+    """Add a new identifier to the database."""
     try:
-        cursor.execute('INSERT INTO identifiers (date, identifier) VALUES (?, ?)', (date, identifier))
+        cursor.execute('INSERT INTO identifiers (identifier, taskid) VALUES (?, ?)', (identifier, taskid))
         conn.commit()
         return {"isDuplicate": False, "message": "Identifier added successfully."}
     except sqlite3.IntegrityError:
         return {"isDuplicate": True, "message": "Duplicate identifier."}
 
-# Path to your Excel file
-excel_file_path = 'identifiers.xlsx'  # Replace with your actual file path
+def process_csv_file(file_path):
+    """Process the CSV file and add identifiers to the database."""
+    # Read the CSV file
+    df = pd.read_csv(file_path)
 
-# Read the Excel file
-df = pd.read_excel(excel_file_path)
+    # Iterate through the rows in the DataFrame
+    for index, row in df.iterrows():
+        identifier = row['identifier']  # Identifier column from CSV
+        taskid = row['taskid']  # Task ID column from CSV
 
-# Iterate through the rows and add them to the database
-for index, row in df.iterrows():
-    date = row['date']  # Assuming the date column is named 'date'
-    identifier = row['identifier']  # Assuming the identifier column is named 'identifier'
-    
-    # Ensure the date is in the correct format (YYYY-MM-DD)
-    try:
-        formatted_date = datetime.strptime(str(date), '%Y-%m-%d').strftime('%Y-%m-%d')
-    except ValueError:
-        print(f"Invalid date format for row {index}: {date}. Skipping this row.")
-        continue
-    
-    # Add to the database
-    result = add_identifier_with_date(formatted_date, identifier)
-    print(f"Row {index}: Identifier '{identifier}' - {result['message']}")
+        # Add the identifier to the database
+        result = add_identifier(identifier, taskid)
+        print(f"Row {index}: Identifier '{identifier}' - {result['message']}")
+
+# Run the script
+if __name__ == '__main__':
+    # Path to your CSV file
+    csv_file_path = 'identifiers.csv'  # Replace with your file name
+    process_csv_file(csv_file_path)
+
+    # Display all records in the database
+    cursor.execute('SELECT * FROM identifiers')
+    all_records = cursor.fetchall()
+    print("\nDatabase Contents:")
+    for record in all_records:
+        print(record)
 
 
 #-----------------------------------------------------------------------------------
