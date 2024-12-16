@@ -3,19 +3,42 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Task Submission</title>
-    <script src="content.js" defer></script>
+    <title>Content Review Check</title>
+    <script>
+        async function checkContent() {
+            const gti = document.getElementById("gti").value;
+            const task_id = document.getElementById("taskid").value;
+
+            // Make POST request to Flask API
+            const response = await fetch('http://localhost:8080/check-identifier', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ identifier: gti, task_id: task_id })
+            });
+
+            const data = await response.json();
+
+            // Show the result in a popup
+            if (data.isDuplicate) {
+                alert(`Duplicate found: Content already reviewed. Found at row: ${data.row}, Task ID: ${data.taskid}`);
+            } else {
+                alert(`New content added: Row ID: ${data.row}, Task ID: ${data.taskid}`);
+            }
+        }
+    </script>
 </head>
 <body>
-    <h1>Submit Task</h1>
-    <form id="taskForm">
+    <h1>Content Review Check</h1>
+    <form onsubmit="event.preventDefault(); checkContent();">
         <label for="gti">GTI:</label>
-        <input type="text" id="gti" name="gti" required>
-        <br><br>
-        <label for="task_id">Task ID:</label>
-        <input type="text" id="task_id" name="task_id" required>
-        <br><br>
-        <button type="submit">Submit</button>
+        <input type="text" id="gti" name="gti" required><br><br>
+
+        <label for="taskid">Task ID:</label>
+        <input type="text" id="taskid" name="taskid" required><br><br>
+
+        <input type="submit" value="Submit">
     </form>
 </body>
 </html>
