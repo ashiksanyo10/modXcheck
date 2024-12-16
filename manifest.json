@@ -1,17 +1,21 @@
 {
   "manifest_version": 3,
-  "name": "Identifier Checker",
+  "name": "Duplicate Content Checker",
   "version": "1.0",
-  "permissions": ["scripting", "activeTab"],
+  "description": "Checks if content has been reviewed before.",
+  "permissions": [
+    "activeTab"
+  ],
   "background": {
     "service_worker": "background.js"
   },
-  "action": {
-    "default_popup": "popup.html",
-    "default_icon": {
-      "16": "icon.png",
-      "48": "icon.png",
-      "128": "icon.png"
+  "content_scripts": [
+    {
+      "matches": ["https://md.dev/task/*"],
+      "js": ["content.js"]
     }
-  }
+  ],
+  "host_permissions": [
+    "http://localhost:5000/*"
+  ]
 }
