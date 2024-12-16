@@ -20,6 +20,48 @@ if __name__ == '__main__':
     # Replace 'your_file.csv' with the path to your CSV file
     csv_file_path = 'your_file.csv'
     csv_to_db(csv_file_path)
+#-----------------------
+primary key
+import pandas as pd
+import sqlite3
+
+def csv_to_db(file_path, db_name='data.db', table_name='data_table'):
+    """Convert CSV file into an SQLite database with gti as primary key and auto-incremented rowid."""
+    # Load the CSV file into a DataFrame
+    df = pd.read_csv(file_path)
+
+    # Connect to SQLite database (create if it doesn't exist)
+    conn = sqlite3.connect(db_name)
+    cursor = conn.cursor()
+
+    # Create a new table with gti as the primary key and auto-incremented rowid
+    cursor.execute(f'''
+        CREATE TABLE IF NOT EXISTS {table_name} (
+            rowid INTEGER PRIMARY KEY AUTOINCREMENT,  -- Auto-incremented rowid
+            gti TEXT UNIQUE,                         -- gti as unique identifier
+            taskid TEXT                              -- taskid column
+        );
+    ''')
+
+    # Insert data from the DataFrame into the table
+    for index, row in df.iterrows():
+        cursor.execute(f'''
+            INSERT OR REPLACE INTO {table_name} (gti, taskid) 
+            VALUES (?, ?);
+        ''', (row['gti'], row['taskid']))
+
+    # Commit the transaction and close the connection
+    conn.commit()
+    print(f"CSV data successfully added to the database '{db_name}' in table '{table_name}'.")
+    conn.close()
+
+# Run the script
+if __name__ == '__main__':
+    # Replace 'your_file.csv' with the path to your CSV file
+    csv_file_path = 'your_file.csv'
+    csv_to_db(csv_file_path)
+
+
 
 #--------------------
 
