@@ -4,19 +4,20 @@ import sqlite3
 app = Flask(__name__)
 
 # Initialize SQLite database
-conn = sqlite3.connect('identifiers.db', check_same_thread=False)
+conn = sqlite3.connect('data.db', check_same_thread=False)
 cursor = conn.cursor()
 
+# Route to check identifier
 @app.route('/check-identifier', methods=['POST'])
 def check_identifier():
     data = request.json
-    identifier = data.get('identifier')
-    task_id = data.get('task_id')
+    identifier = data.get('identifier')  # gti
+    task_id = data.get('task_id')        # task id
 
     print(f"Received data: Identifier = {identifier}, Task ID = {task_id}")
     
-    # Check if identifier exists in the database
-    cursor.execute('SELECT * FROM identifiers WHERE identifier = ?', (identifier,))
+    # Check if identifier exists in the database (search by gti)
+    cursor.execute('SELECT * FROM data_table WHERE gti = ?', (identifier,))
     existing_record = cursor.fetchone()
 
     if existing_record:
@@ -24,11 +25,11 @@ def check_identifier():
         return jsonify({
             'isDuplicate': True,
             'message': 'Content already reviewed',
-            'row': existing_record[0]  # Assuming the row ID is the first column
+            'row': existing_record[0]  # Assuming the row ID is the first column, adjust if needed
         })
     else:
         # Insert new record into the database
-        cursor.execute('INSERT INTO identifiers (identifier, task_id) VALUES (?, ?)', (identifier, task_id))
+        cursor.execute('INSERT INTO data_table (gti, taskid) VALUES (?, ?)', (identifier, task_id))
         conn.commit()
         print(f"New identifier added: {identifier}")
         
