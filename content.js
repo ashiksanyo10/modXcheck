@@ -1,52 +1,34 @@
-// Function to scrape the gti (identifier) and task id from the webpage
-function scrapeData() {
-    const gti = document.querySelector('td.css-18tzy6q span') ? document.querySelector('td.css-18tzy6q span').textContent.split(': ')[1] : '';
-    const taskid = document.querySelector('a.css-erwrwv span.white') ? document.querySelector('a.css-erwrwv span.white').textContent : '';
-    return { gti, taskid };
-}
-
-// Function to check if the gti is a duplicate by calling the Flask API
-async function checkDuplicate(gti) {
-    const response = await fetch(`http://localhost:5000/check_identifier?gti=${gti}`);
-    const data = await response.json();
-    return data.isDuplicate;
-}
-
-// Function to add identifier to the database
-async function addIdentifier(gti, taskid) {
-    const response = await fetch('http://localhost:5000/add_identifier', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ gti: gti, taskid: taskid }),
-    });
-    const data = await response.json();
-    return data.isDuplicate;
-}
-
-// Main function to execute when the page loads or when a user interacts
-async function handleIdentifier() {
-    const { gti, taskid } = scrapeData();
+// This will check if the URL matches the pattern
+if (window.location.href.includes('md.dev/task/')) {
+    // Scrape the identifier (gti)
+    const gtiElement = document.querySelector('td.css-18tzy6q span');
+    const taskIdElement = document.querySelector('a.css-erwrwv span.white');
     
-    if (!gti || !taskid) {
-        alert("GTI or Task ID not found on the page.");
-        return;
-    }
-
-    // Check if the gti is a duplicate
-    const isDuplicate = await checkDuplicate(gti);
-    if (isDuplicate) {
-        // Show a popup for duplicate title
-        alert("This title has already been reviewed.");
-    } else {
-        // Add the gti and taskid to the database if it's unique
-        const added = await addIdentifier(gti, taskid);
-        if (!added) {
-            alert("Identifier added successfully.");
-        }
+    if (gtiElement && taskIdElement) {
+        const gti = gtiElement.textContent.replace('gti: ', '').trim();
+        const taskId = taskIdElement.textContent.trim();
+        
+        // Send the scraped data to the Flask backend for duplicate checking
+        fetch('http://localhost:5000/check', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                gti: gti,
+                taskId: taskId
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.isDuplicate) {
+                // Show the duplicate message
+                alert('This title has already been reviewed.');
+            } else {
+                // If not a duplicate, proceed to add to database (optional)
+                alert('This title is new and will be added to the database.');
+            }
+        })
+        .catch(error => console.error('Error:', error));
     }
 }
-
-// Call handleIdentifier() when the page loads
-window.onload = handleIdentifier;
