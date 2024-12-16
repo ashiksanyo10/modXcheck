@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
-  "name": "Duplicate Content Checker",
+  "name": "Content Review Checker",
   "version": "1.0",
-  "description": "Checks if content has been reviewed before.",
+  "description": "Check if the content has already been reviewed",
   "permissions": [
     "activeTab"
   ],
@@ -11,11 +11,11 @@
   },
   "content_scripts": [
     {
-      "matches": ["https://md.dev/task/*"],
+      "matches": ["https://md.dev/task/*"],  // Match the page where the task is
       "js": ["content.js"]
     }
   ],
   "host_permissions": [
-    "http://localhost:5000/*"
+    "http://localhost:8080/*"
   ]
 }
