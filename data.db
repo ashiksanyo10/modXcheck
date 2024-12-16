@@ -1,49 +1,26 @@
 import pandas as pd
 import sqlite3
 
-def create_table_from_csv(file_path, db_name='data.db', table_name='data_table'):
-    """Create SQLite database and table based on CSV columns."""
+def csv_to_db(file_path, db_name='data.db', table_name='data_table'):
+    """Convert CSV file into an SQLite database."""
     # Load the CSV file
     df = pd.read_csv(file_path)
 
-    # Connect to SQLite database (it will create the file if it doesn't exist)
+    # Connect to SQLite database (create if it doesn't exist)
     conn = sqlite3.connect(db_name)
-    cursor = conn.cursor()
 
-    # Dynamically create the table schema based on CSV columns
-    columns = df.columns
-    column_definitions = ', '.join([f'{col} TEXT' for col in columns])  # Define all columns as TEXT
-    create_table_query = f'CREATE TABLE IF NOT EXISTS {table_name} (id INTEGER PRIMARY KEY AUTOINCREMENT, {column_definitions})'
-    cursor.execute(create_table_query)
-
-    # Insert rows from CSV into the database
-    for _, row in df.iterrows():
-        placeholders = ', '.join(['?'] * len(columns))
-        insert_query = f'INSERT INTO {table_name} ({", ".join(columns)}) VALUES ({placeholders})'
-        cursor.execute(insert_query, row.tolist())
-    conn.commit()
+    # Write the DataFrame into the SQLite table
+    df.to_sql(table_name, conn, if_exists='replace', index=False)
 
     print(f"CSV data successfully added to the database '{db_name}' in table '{table_name}'.")
     conn.close()
 
-def show_db_contents(db_name='data.db', table_name='data_table'):
-    """Display the contents of the database."""
-    conn = sqlite3.connect(db_name)
-    cursor = conn.cursor()
-    cursor.execute(f'SELECT * FROM {table_name}')
-    rows = cursor.fetchall()
-    conn.close()
-
-    print("\nDatabase Contents:")
-    for row in rows:
-        print(row)
-
 # Run the script
 if __name__ == '__main__':
-    # Replace 'your_file.csv' with your actual CSV file path
+    # Replace 'your_file.csv' with the path to your CSV file
     csv_file_path = 'your_file.csv'
-    create_table_from_csv(csv_file_path)
-    show_db_contents()
+    csv_to_db(csv_file_path)
+
 
 
 
