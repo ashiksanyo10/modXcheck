@@ -21,6 +21,25 @@ if __name__ == '__main__':
     csv_file_path = 'your_file.csv'
     csv_to_db(csv_file_path)
 
+#--------------------
+
+import pandas as pd
+import sqlite3
+
+# Connect to SQLite database
+conn = sqlite3.connect('data.db')
+
+# Load the table into a DataFrame
+df = pd.read_sql('SELECT * FROM data_table', conn)
+
+# Drop columns that start with "UNNAMED"
+df = df.loc[:, ~df.columns.str.contains('^Unnamed')]
+
+# Write the cleaned DataFrame back to the database
+df.to_sql('data_table', conn, if_exists='replace', index=False)
+
+print("UNNAMED columns removed successfully.")
+conn.close()
 
 
 
