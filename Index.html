@@ -3,45 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Flask API</title>
+    <title>Task Submission</title>
+    <script src="content.js" defer></script>
 </head>
 <body>
-    <h1>Test Flask API</h1>
-    <form id="testForm">
-        <label for="identifier">Identifier:</label><br>
-        <input type="text" id="identifier" name="identifier" value="gti: abcdefghijklmnopqr-stuvwxyz"><br>
-        <label for="task_id">Task ID:</label><br>
-        <input type="text" id="task_id" name="task_id" value="760353b5-f9ca-4bc7-9d5a-c7625abb1b16"><br><br>
-        <input type="submit" value="Submit">
+    <h1>Submit Task</h1>
+    <form id="taskForm">
+        <label for="gti">GTI:</label>
+        <input type="text" id="gti" name="gti" required>
+        <br><br>
+        <label for="task_id">Task ID:</label>
+        <input type="text" id="task_id" name="task_id" required>
+        <br><br>
+        <button type="submit">Submit</button>
     </form>
-
-    <script>
-        document.getElementById('testForm').addEventListener('submit', function(e) {
-            e.preventDefault();  // Prevent the default form submission
-
-            const identifier = document.getElementById('identifier').value;
-            const task_id = document.getElementById('task_id').value;
-
-            // Send POST request to Flask server
-            fetch('http://localhost:8080/check-identifier', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    identifier: identifier,
-                    task_id: task_id
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert('Response: ' + JSON.stringify(data));
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('An error occurred.');
-            });
-        });
-    </script>
 </body>
 </html>
