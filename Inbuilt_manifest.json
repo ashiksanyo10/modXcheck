@@ -1,0 +1,24 @@
+{
+    "manifest_version": 3,
+    "name": "GTI Validator",
+    "version": "1.0",
+    "description": "Check GTI and Task ID against the database.",
+    "permissions": [
+        "scripting",
+        "activeTab",
+        "storage",
+        "http://localhost:8080/*"
+    ],
+    "host_permissions": [
+        "https://md.dev/task/*"
+    ],
+    "background": {
+        "service_worker": "background.js"
+    },
+    "content_scripts": [
+        {
+            "matches": ["https://md.dev/task/*"],
+            "js": ["content.js"]
+        }
+    ]
+}
