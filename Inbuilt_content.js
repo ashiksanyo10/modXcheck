@@ -5,26 +5,28 @@ function scrapeData() {
     let gti = null;
     let taskId = null;
 
-    // Scrape GTI: Search in all <td> <span> elements for text starting with "gti:"
-    const tdSpans = document.querySelectorAll("td span");
-    tdSpans.forEach(span => {
-        const textContent = span.textContent.trim();
-        if (textContent.startsWith("gti:")) {
-            gti = textContent.replace("gti:", "").trim(); // Extract the GTI value
-            console.log(`GTI Found: ${gti}`);
-        }
-    });
+    // Scrape GTI using XPath
+    const gtiXPath = '//*[@id="app-layout-content-1"]/div[2]/div/div/div[1]/div[2]/div/div[2]/table/tbody/tr[9]/td[2]/span';
+    const gtiElement = document.evaluate(gtiXPath, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
+    if (gtiElement) {
+        gti = gtiElement.textContent.replace("gti:", "").trim(); // Extract GTI value
+        console.log(`GTI Found: ${gti}`);
+    } else {
+        console.error("GTI not found using XPath.");
+    }
 
-    // Scrape Task ID: Look for the specific <a> tag structure and <span> class
+    // Scrape Task ID using CSS selector
     const taskIdElement = document.querySelector('a.css-erwrwv > span.white');
     if (taskIdElement) {
         taskId = taskIdElement.textContent.trim(); // Extract Task ID value
         console.log(`Task ID Found: ${taskId}`);
+    } else {
+        console.error("Task ID not found using CSS selector.");
     }
 
-    // Check if both values are found
+    // Return scraped data
     if (!gti || !taskId) {
-        console.error("Unable to scrape GTI or Task ID. Ensure the page structure matches the selectors.");
+        console.error("Scraping failed: GTI or Task ID missing.");
         return null;
     }
 
