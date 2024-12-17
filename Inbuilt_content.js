@@ -1,20 +1,33 @@
 // content.js
 
-// Function to scrape GTI and Task ID from the website
+// Function to scrape GTI and Task ID dynamically
 function scrapeData() {
-    // Replace these with the actual selectors for GTI and Task ID on the target website
-    const gtiElement = document.querySelector(".gti-class"); // Update with correct class or ID
-    const taskIdElement = document.querySelector(".task-id-class"); // Update with correct class or ID
+    let gti = null;
+    let taskId = null;
 
-    if (!gtiElement || !taskIdElement) {
-        console.error("Unable to find GTI or Task ID elements on the page.");
+    // Scrape GTI: Search in all <td> <span> elements for text starting with "gti:"
+    const tdSpans = document.querySelectorAll("td span");
+    tdSpans.forEach(span => {
+        const textContent = span.textContent.trim();
+        if (textContent.startsWith("gti:")) {
+            gti = textContent.replace("gti:", "").trim(); // Extract the GTI value
+            console.log(`GTI Found: ${gti}`);
+        }
+    });
+
+    // Scrape Task ID: Look for the specific <a> tag structure and <span> class
+    const taskIdElement = document.querySelector('a.css-erwrwv > span.white');
+    if (taskIdElement) {
+        taskId = taskIdElement.textContent.trim(); // Extract Task ID value
+        console.log(`Task ID Found: ${taskId}`);
+    }
+
+    // Check if both values are found
+    if (!gti || !taskId) {
+        console.error("Unable to scrape GTI or Task ID. Ensure the page structure matches the selectors.");
         return null;
     }
 
-    const gti = gtiElement.textContent.trim();
-    const taskId = taskIdElement.textContent.trim();
-
-    console.log(`Scraped Data: GTI = ${gti}, Task ID = ${taskId}`);
     return { gti, taskId };
 }
 
