@@ -1,6 +1,8 @@
 (async () => {
     // Wait for the DOM to fully load
     document.addEventListener('DOMContentLoaded', async () => {
+        console.log("content.js loaded");
+
         try {
             // Find GTI and Task ID elements
             const gtiElement = document.querySelector('td.css-18tzy6q > span');
@@ -38,6 +40,7 @@
             const data = await response.json();
 
             // Show the result in a popup
+            console.log("API Response: ", data);
             alert(
                 data.isDuplicate
                     ? `Duplicate found: Content already reviewed.\nFound at row: ${data.row}\nTask ID: ${data.taskid}`
